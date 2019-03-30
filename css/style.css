@@ -1,0 +1,16 @@
+/* apply boarder box to everything */
+*, *:before, *:after {
+    box-sizing: border-box;
+}
+
+
+
+/* Main */
+
+@import url('https://fonts.googleapis.com/css?family=Montserrat');
+
+#myCanvas{
+    width: 80%;
+    height: 80%;
+    border: 1px solid black;
+}

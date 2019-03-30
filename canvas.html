@@ -1,0 +1,121 @@
+<html>
+<head><link type="text/css" rel="stylesheet" href="css/style.css" /></head>
+<body>
+<script>
+// create canvas element and append it to document body
+var canvas = document.createElement('canvas');
+document.body.appendChild(canvas);
+
+
+// get canvas 2D context and set him correct size
+var color_picker = document.getElementById("colorPicker");
+var ctx = canvas.getContext('2d');
+var my_width = 1;
+ctx.lineCap = "round";
+ctx.canvas.width = window.innerWidth * .8;
+ctx.canvas.height = window.outerHeight * .8;
+ctx.canvas.style.border='1px solid black';
+
+// last known position
+var pos = { x: 0, y: 0 };
+window.addEventListener('load', defaultColor);
+document.addEventListener('mousemove', mouseMove);
+document.addEventListener('mousedown', draw);
+document.addEventListener('mousedown', setPosition);
+document.addEventListener('mouseenter', setPosition);
+document.addEventListener("keydown", keyPressed);
+window.addEventListener("orientationchange", resize);
+document.addEventListener('touchstart', touchStart);
+document.addEventListener('touchmove', touchMove);
+color_picker.addEventListener('change', event => {
+    context.fillStyle = event.target.value;
+});
+function color_change(e){
+    ctx.fillStyle = e.target.value;
+}
+function defaultColor(){
+    ctx.fillStyle="#FF0000";
+}
+function keyPressed(e){
+    if(e.keyCode == "38") {
+        e.preventDefault();
+        my_width++;
+    }
+    
+    if (e.keyCode =="40" && my_width > 1){
+        e.preventDefault();
+        my_width--;
+    }
+    
+    if(e.keyCode == "66"){
+        ctx.fillStyle = '#0000FF';
+    }
+    if(e.keyCode == "71"){
+        ctx.fillStyle = '#008000';
+    }
+    if(e.keyCode == "82"){
+        ctx.fillStyle = '#FF0000';
+    }
+    if(e.keyCode == "89"){
+        ctx.fillStyle = "#FFFF00";
+    }
+    if(e.keyCode == "32"){
+        e.preventDefault();
+        ctx.clearRect(0,0,canvas.width, canvas.height);
+    }
+}
+function mouseMove(e){
+    setPosition(e);
+    draw(e);
+}
+function setPosition(e) {
+  pos.x = e.offsetX;
+  pos.y = e.offsetY;
+}
+function resize() {
+    var width = window.innerWidth * .80;
+    var height = window.innerHeight * .80;
+    ctx.canvas.width = width;
+    ctx.canvas.height = height;
+    ctx.canvas.style.border='1px solid black';
+}
+function draw(e) {
+  // mouse left button must be pressed
+  if (e.buttons !== 1) return;
+
+  ctx.beginPath(); // begin
+  ctx.arc(pos.x, pos.y, my_width, 0, Math.PI*2, true);
+  ctx.closePath();
+  ctx.fill();    
+}
+
+var touchPos = { x: 0, y: 0};
+
+function setTouchPosition(e){
+    e.preventDefault();
+    if(e.touches){
+        if(e.touches.length == 1){
+            var touch = e.touches[0];
+            touchPos.x = touch.pageX-touch.target.offsetLeft;
+            touchPos.y = touch.pageY-touch.target.offsetTop;
+        }
+    }
+}
+    
+function touchMove(e){
+    setTouchPosition(e);
+    draw(ctx, touchPos.x, touchPos.y, 12);
+    event.preventDefault(); // stops from scrolling on touch
+}
+function touchStart(){
+    setTouchPosition();
+    draw(ctx, touchPos.x, touchPos.y, 12);
+    event.preventDefault(); // stops from scrolling on tocu
+}
+</script>
+<div>
+<input type="color" id="colorPicker">    
+</div>
+    
+</body>
+</html>
