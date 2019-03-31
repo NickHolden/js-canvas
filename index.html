@@ -112,6 +112,7 @@
     }
     
     function drawTouch(){
+        event.preventDefault();
         context.beginPath();
         context.arc(touchPos.x, touchPos.y, current_width, 0, Math.PI*2, true);
         context.closePath();
