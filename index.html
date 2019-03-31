@@ -25,11 +25,9 @@ document.addEventListener('mousedown', setPosition);
 document.addEventListener('mouseenter', setPosition);
 document.addEventListener("keydown", keyPressed);
 window.addEventListener("orientationchange", resize);
-document.addEventListener('touchstart', touchStart);
+window.addEventListener("orientationchange", defaultColor);
+document.addEventListener('touchstart', startTouch);
 document.addEventListener('touchmove', touchMove);
-color_picker.addEventListener('change', event => {
-    context.fillStyle = event.target.value;
-});
 function color_change(e){
     ctx.fillStyle = e.target.value;
 }
@@ -90,27 +88,30 @@ function draw(e) {
 }
 
 var touchPos = { x: 0, y: 0};
-
-function setTouchPosition(e){
-    e.preventDefault();
-    if(e.touches){
-        if(e.touches.length == 1){
-            var touch = e.touches[0];
-            touchPos.x = touch.pageX-touch.target.offsetLeft;
-            touchPos.y = touch.pageY-touch.target.offsetTop;
-        }
-    }
-}
     
-function touchMove(e){
-    setTouchPosition(e);
-    draw(ctx, touchPos.x, touchPos.y, 12);
-    event.preventDefault(); // stops from scrolling on touch
+function startTouch(){
+    touchPosition();
+    drawTouch();
+    event.preventDefault();
 }
-function touchStart(){
-    setTouchPosition();
-    draw(ctx, touchPos.x, touchPos.y, 12);
-    event.preventDefault(); // stops from scrolling on tocu
+function drawTouch(){
+    ctx.beginPath();
+    ctx.arc(touchPos.x, touchPos.y, my_width, 0, Math.PI*2, true);
+    ctx.closePath();
+    ctx.fill();
+}
+function touchMove(e){
+    touchPosition(e);
+    drawTouch();
+    event.preventDefault();
+}
+function touchPosition(e){
+    if(!e) { var e = event; }
+    if(e.touches && e.touches.length == 1) {
+        var touch = e.touches[0];
+        touchPos.x = touch.pageX - touch.target.offsetLeft;
+        touchPos.y = touch.pageY - touch.target.offsetTop;
+    }
 }
 </script>
 <div>
