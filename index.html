@@ -1,122 +1,154 @@
 <html>
-<head><link type="text/css" rel="stylesheet" href="css/style.css" /></head>
 <body>
 <script>
-// create canvas element and append it to document body
-var canvas = document.createElement('canvas');
-document.body.appendChild(canvas);
-
-
-// get canvas 2D context and set him correct size
-var color_picker = document.getElementById("colorPicker");
-var ctx = canvas.getContext('2d');
-var my_width =1;
-ctx.lineCap = "round";
-ctx.canvas.width = window.innerWidth * .8;
-ctx.canvas.height = window.outerHeight * .8;
-ctx.canvas.style.border='1px solid black';
-
-// last known position
-var pos = { x: 0, y: 0 };
-window.addEventListener('load', defaultColor);
-document.addEventListener('mousemove', mouseMove);
-document.addEventListener('mousedown', draw);
-document.addEventListener('mousedown', setPosition);
-document.addEventListener('mouseenter', setPosition);
-document.addEventListener("keydown", keyPressed);
-window.addEventListener("orientationchange", resize);
-window.addEventListener("orientationchange", defaultColor);
-document.addEventListener('touchstart', startTouch);
-document.addEventListener('touchmove', touchMove);
-function color_change(e){
-    ctx.fillStyle = e.target.value;
-}
-function defaultColor(){
-    ctx.fillStyle="#FF0000";
-}
-function keyPressed(e){
-    if(e.keyCode == "38") {
-        e.preventDefault();
-        my_width++;
+    
+    // create canvas element and append it to the body of doc
+    var canvas = document.createElement("canvas");
+    document.body.appendChild(canvas);
+    var context = canvas.getContext("2d");
+    
+    // set default width
+    var current_width = 1;
+    
+    // set w/h to 80% w/ border and round "brush"
+    context.lineCap = "round";
+    context.canvas.width = window.innerWidth * .8;
+    context.canvas.height = window.innerHeight * .8;
+    context.canvas.style.border = "1px solid black";
+    
+    // position objects for touch and mouse
+    var mousePos = { x: 0, y: 0 };
+    var touchPos = { x: 0, y: 0 };
+    
+    // function for the color picker
+    function changeColor(){
+        var color = document.getElementById('colorPicker');
+        context.fillStyle = color.value;
     }
     
-    if (e.keyCode =="40" && my_width > 1){
-        e.preventDefault();
-        my_width--;
+    // function to set default color on page load
+    function defaultColor(){
+        context.fillStyle = "#FF0000";
     }
     
-    if(e.keyCode == "66"){
-        ctx.fillStyle = '#0000FF';
-    }
-    if(e.keyCode == "71"){
-        ctx.fillStyle = '#008000';
-    }
-    if(e.keyCode == "82"){
-        ctx.fillStyle = '#FF0000';
-    }
-    if(e.keyCode == "89"){
-        ctx.fillStyle = "#FFFF00";
-    }
-    if(e.keyCode == "32"){
-        e.preventDefault();
-        ctx.clearRect(0,0,canvas.width, canvas.height);
-    }
-}
-function mouseMove(e){
-    setPosition(e);
-    draw(e);
-}
-function setPosition(e) {
-  pos.x = e.offsetX;
-  pos.y = e.offsetY;
-}
-function resize() {
-    var width = window.innerWidth * .80;
-    var height = window.innerHeight * .80;
-    ctx.canvas.width = width;
-    ctx.canvas.height = height;
-    ctx.canvas.style.border='1px solid black';
-}
-function draw(e) {
-  // mouse left button must be pressed
-  if (e.buttons !== 1) return;
-
-  ctx.beginPath(); // begin
-  ctx.arc(pos.x, pos.y, my_width, 0, Math.PI*2, true);
-  ctx.closePath();
-  ctx.fill();    
-}
-
-var touchPos = { x: 0, y: 0};
+    // function to deal with key presses for color changing etc
+    function keyPressed(e){
+        if(e.keyCode == "38"){
+            e.preventDefault();
+            current_width++;
+        }
+        if (e.keyCode =="40" && my_width > 1){
+            e.preventDefault();
+            current_width--;
+        }
     
-function startTouch(){
-    touchPosition();
-    drawTouch();
-    event.preventDefault();
-}
-function drawTouch(){
-    ctx.beginPath();
-    ctx.arc(touchPos.x, touchPos.y, my_width, 0, Math.PI*2, true);
-    ctx.closePath();
-    ctx.fill();
-}
-function touchMove(e){
-    touchPosition(e);
-    drawTouch();
-    event.preventDefault();
-}
-function touchPosition(e){
-    if(!e) { var e = event; }
-    if(e.touches && e.touches.length == 1) {
-        var touch = e.touches[0];
-        touchPos.x = touch.pageX - touch.target.offsetLeft;
-        touchPos.y = touch.pageY - touch.target.offsetTop;
+        if(e.keyCode == "66"){
+            context.fillStyle = '#0000FF';
+        }
+        if(e.keyCode == "71"){
+            context.fillStyle = '#008000';
+        }
+        if(e.keyCode == "82"){
+            context.fillStyle = '#FF0000';
+        } 
+        if(e.keyCode == "89"){
+            context.fillStyle = "#FFFF00";
+        }
+        if(e.keyCode == "32"){
+            e.preventDefault();
+            context.clearRect(0,0,canvas.width, canvas.height);
+        }
     }
-}
+    
+    // resize function for when orientation changes
+    function resizeCanvas(){
+        context.canvas.width = window.innerWidth * .8;
+        context.canvas.height = window.innerHeight * .8;
+        context.canvas.style.border = "1px solid black";
+    }
+    
+    // START MOUSE DRAW FUNCTIONS
+    
+    function setMousePosition(e){
+        mousePos.x = e.offsetX;
+        mousePos.y = e.offsetY;
+    }
+    
+    // primary drawing function
+    function mouseDraw(e){
+        // need to make sure left click on mouse is pressed
+        if (e.buttons !== 1) return;
+        
+        context.beginPath();
+        // takes in the x,y coordinates for the middle of the circle
+        // radius = width of brush
+        // then starting angle, ending angle
+        context.arc(mousePos.x, mousePos.y, current_width, 0, Math.PI*2, true);
+        context.closePath();
+        context.fill();
+    }
+    
+    // function to update position and draw when mouse is moved
+    function mouseMove(e){
+        setMousePosition(e);
+        mouseDraw(e);
+    }
+    
+    // START TOUCH DRAW FUNCTIONS
+    
+    function setTouchPosition(e){
+        if(!e) var e = event;
+        
+        // checks that there is a touch and only 1 finger used
+        if(e.touches && e.touches.length){
+            var touch = e.touches[0];
+            touchPos.x = touch.pageX - touch.target.offsetLeft;
+            touchPos.y = touch.pageY - touch.target.offsetTop;
+        }
+    }
+    
+    function drawTouch(){
+        context.beginPath();
+        context.arc(touchPos.x, touchPos.y, current_width, 0, Math.PI*2, true);
+        context.closePath();
+        context.fill();
+    }
+    
+    function startTouch(e){
+        setTouchPosition(e);
+        drawTouch();
+        // prevent the touch from scrolling page when drawing
+        event.preventDefault();
+    }
+    
+    function touchMove(e){
+        setTouchPosition(e);
+        drawTouch();
+        // prevent the touch from scrolling page when drawing
+        event.preventDefault();
+    }
+    
+    // event listeners
+    window.onload = defaultColor();
+    window.addEventListener('orientationchange', resizeCanvas);
+    window.addEventListener('orientationchange', defaultColor);
+    canvas.addEventListener('mousemove', mouseMove);
+    canvas.addEventListener('mousedown', mouseDraw);
+    canvas.addEventListener('mousedown', setMousePosition);
+    canvas.addEventListener('mouseenter', setMousePosition);
+    document.addEventListener('keydown', keyPressed);
+    document.addEventListener('touchstart', startTouch);
+    document.addEventListener('touchmove', touchMove);
+    
+
 </script>
-<div>
-<input type="color" id="colorPicker">    
-</div>
+
+
+    <div>
+        <input type="color" id="colorPicker" value="#FF0000" onchange="changeColor()"> 
+    </div>
     
 </body>
+
+
 </html>
